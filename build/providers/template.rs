@@ -4,7 +4,7 @@
 //! - Copy this file to `build/providers/<your_name>.rs`.
 //! - Replace placeholder names, URLs, types, and env vars.
 //! - Add `pub mod <your_name>;` and include `<your_name>::SPEC` in `ALL` in `build/providers/mod.rs`.
-//! - Run `MODELS_REPOSITORY_BUILD=1 cargo build` to refresh all providers.
+//! - Run `AI_MODEL_CATALOG_BUILD=1 cargo build` to refresh all providers.
 
 use std::error::Error;
 

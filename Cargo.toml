@@ -1,5 +1,5 @@
 [package]
-name = "models-repostory"
+name = "ai-model-catalog"
 version = "0.1.0"
 edition = "2021"
 build = "build.rs"

@@ -5,7 +5,7 @@ use std::{env, fs, path::PathBuf};
 mod build_support;
 
 fn main() {
-    println!("cargo:rerun-if-env-changed=MODELS_REPOSITORY_BUILD");
+    println!("cargo:rerun-if-env-changed=AI_MODEL_CATALOG_BUILD");
     println!("cargo:rerun-if-env-changed=OPENROUTER_API_KEY");
     println!("cargo:rerun-if-changed=build.rs");
 
@@ -19,7 +19,7 @@ fn main() {
     let providers = build_support::providers::ALL;
 
     // If the build env is present, rebuild all providers.
-    let rebuild_all = env::var_os("MODELS_REPOSITORY_BUILD").is_some();
+    let rebuild_all = env::var_os("AI_MODEL_CATALOG_BUILD").is_some();
 
     for p in providers.iter() {
         let model_data_path = model_data_dir.join(p.file_name);

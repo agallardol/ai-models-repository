@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use models_repostory::{get_openrouter_model, list_openrouter_model_ids};
+    use ai_model_catalog::{get_openrouter_model, list_openrouter_model_ids};
 
     #[test]
     fn test_list_openrouter_model_ids() {
