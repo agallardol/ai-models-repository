@@ -54,9 +54,9 @@ pub fn fetch_models_map_json() -> Result<String, Box<dyn Error>> {
     // Parse into your types, then reshape as needed.
     let json: ApiResponse = resp.json()?;
 
-    // Option A: return as a map keyed by id
-    // use std::collections::HashMap;
-    // let mut map: HashMap<String, Model> = HashMap::with_capacity(json.data.len());
+    // Option A: return as a deterministically-ordered map keyed by id
+    // use std::collections::BTreeMap;
+    // let mut map: BTreeMap<String, Model> = BTreeMap::new();
     // for m in json.data.into_iter() {
     //     map.insert(m.id.to_ascii_lowercase(), m);
     // }
