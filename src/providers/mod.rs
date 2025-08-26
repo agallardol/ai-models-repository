@@ -6,4 +6,3 @@ pub mod openrouter;
 pub enum Provider {
     OpenRouter,
 }
-

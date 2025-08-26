@@ -29,7 +29,10 @@ fn main() {
             match (p.fetch)() {
                 Ok(json) => {
                     if let Err(e) = fs::write(&model_data_path, &json) {
-                        println!("cargo:warning=Failed to write {}: {e}", model_data_path.display());
+                        println!(
+                            "cargo:warning=Failed to write {}: {e}",
+                            model_data_path.display()
+                        );
                     }
                     if let Err(e) = fs::write(&out_path, json) {
                         println!("cargo:warning=Failed to write {}: {e}", out_path.display());

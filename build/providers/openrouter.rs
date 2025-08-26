@@ -86,7 +86,6 @@ struct TopProvider {
     is_moderated: Option<bool>,
 }
 
-
 pub fn fetch_models_map_json() -> Result<String, Box<dyn std::error::Error>> {
     let url = "https://openrouter.ai/api/v1/models";
     let api_key = env::var("OPENROUTER_API_KEY").ok();

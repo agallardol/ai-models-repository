@@ -1,26 +1,101 @@
 name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
 
 jobs:
   publish:
+    name: Build, test, and publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Rust
-        uses: actions/toolchain@v1
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Show rustc/cargo versions
+        run: |
+          rustc -V
+          cargo -V
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy lint
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run tests
+        run: cargo test --all --locked
 
       - name: Build with models
-        run: MODELS_REPOSITORY_BUILD=1 cargo build --release
+        env:
+          MODELS_REPOSITORY_BUILD: "1"
+        run: cargo build --release --locked
 
-      - name: Publish to crates.io
+      - name: Fail if repo changed after build
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Repository has changes after build. Commit model updates via PR before releasing." >&2
+            git --no-pager status
+            git --no-pager diff --stat | cat
+            exit 1
+          fi
+
+      - name: Ensure tag version matches Cargo.toml
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG_REF="${GITHUB_REF#refs/tags/}"
+          if [[ ! "$TAG_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+            echo "Tag $TAG_REF must start with v and follow semver (e.g. v1.2.3)" >&2
+            exit 1
+          fi
+          TAG_VERSION="${TAG_REF#v}"
+          TOML_VERSION=$(grep -m1 '^version\s*=\s*"' Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Tag version: $TAG_VERSION"
+          echo "Cargo.toml version: $TOML_VERSION"
+          if [ "$TAG_VERSION" != "$TOML_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match Cargo.toml ($TOML_VERSION)" >&2
+            exit 1
+          fi
+
+      - name: Verify package metadata
+        run: cargo package --allow-dirty
+
+      - name: Dry-run publish on non-tag
+        if: startsWith(github.ref, 'refs/tags/') == false
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish
+        run: cargo publish --dry-run --allow-dirty --locked
+
+      - name: Publish to crates.io
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --locked
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

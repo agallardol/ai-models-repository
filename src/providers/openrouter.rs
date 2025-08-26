@@ -6,10 +6,7 @@ use std::collections::HashMap;
 const MODELS_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/models_openrouter.json"));
 
 static MODELS: Lazy<HashMap<String, OpenRouterModel>> = Lazy::new(|| {
-    match serde_json::from_str::<HashMap<String, OpenRouterModel>>(MODELS_JSON) {
-        Ok(map) => map,
-        Err(_) => HashMap::new(),
-    }
+    serde_json::from_str::<HashMap<String, OpenRouterModel>>(MODELS_JSON).unwrap_or_default()
 });
 
 #[derive(Debug, Clone, Deserialize, Default)]
