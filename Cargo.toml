@@ -3,6 +3,14 @@ name = "ai-model-catalog"
 version = "0.1.0"
 edition = "2021"
 build = "build.rs"
+description = "Build-time AI model catalog for Rust. Embed provider model metadata for zero-runtime lookups."
+repository = "https://github.com/agallardol/ai-model-catalog"
+homepage = "https://github.com/agallardol/ai-model-catalog"
+documentation = "https://docs.rs/ai-model-catalog"
+readme = "README.md"
+keywords = ["ai", "llm", "models", "openrouter", "metadata"]
+license = "MIT"
+rust-version = "1.70"
 
 [dependencies]
 once_cell = "1"

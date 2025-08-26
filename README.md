@@ -6,7 +6,7 @@ Find models by id, context window, pricing, capabilities (e.g., tools, structure
 
 Keywords: AI model catalog for Rust, LLM registry, OpenRouter models, model metadata, context window, pricing, tokenizer, supported parameters, OpenAI, Anthropic, Google Gemini, Mistral, compile-time model index.
 
-> Note: The repository and crate are named "AI Model Catalog". Import as `ai_model_catalog` in Rust.
+> Note: The crate is named `ai-model-catalog` (import as `ai_model_catalog`).
 
 ## Why this exists
 
@@ -39,7 +39,7 @@ Git (alternative):
 
 ```toml
 [dependencies]
-ai-model-catalog = { git = "https://github.com/<your-username>/ai-model-catalog" }
+ai-model-catalog = { git = "https://github.com/agallardol/ai-model-catalog" }
 ```
 
 Import path mapping: crate hyphens become underscores in Rust code.
