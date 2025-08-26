@@ -2,13 +2,45 @@ name: PR Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  rust:
+    name: Rust CI
     runs-on: ubuntu-latest
-
+    env:
+      CARGO_TERM_COLOR: always
     steps:
-    - uses: actions/checkout@v2
-    - name: Run tests
-      run: cargo test
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: Format (rustfmt)
+        run: cargo fmt --all -- --check
+
+      - name: Lint (clippy)
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Build
+        run: cargo build --locked --all-features
+
+      - name: Test
+        run: cargo test --locked --all-features

@@ -1,6 +1,6 @@
-//! Build-time models repository, organized by provider (OpenRouter first).
+//! AI Model Catalog: build-time embedded model metadata, organized by provider (OpenRouter first).
 //!
-//! Set `MODELS_REPOSITORY_BUILD=1` (optionally set `OPENROUTER_API_KEY`) before building
+//! Set `AI_MODEL_CATALOG_BUILD=1` (optionally set `OPENROUTER_API_KEY`) before building
 //! to fetch and embed the latest OpenRouter models catalog. At runtime, use
 //! provider-specific lookups, e.g., `providers::openrouter::get_model(id)`.
 

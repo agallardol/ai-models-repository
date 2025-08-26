@@ -4,7 +4,7 @@
 //! - Copy this file to `build/providers/<your_name>.rs`.
 //! - Replace placeholder names, URLs, types, and env vars.
 //! - Add `pub mod <your_name>;` and include `<your_name>::SPEC` in `ALL` in `build/providers/mod.rs`.
-//! - Run `MODELS_REPOSITORY_BUILD=1 cargo build` to refresh all providers.
+//! - Run `AI_MODEL_CATALOG_BUILD=1 cargo build` to refresh all providers.
 
 use std::error::Error;
 
@@ -54,9 +54,9 @@ pub fn fetch_models_map_json() -> Result<String, Box<dyn Error>> {
     // Parse into your types, then reshape as needed.
     let json: ApiResponse = resp.json()?;
 
-    // Option A: return as a map keyed by id
-    // use std::collections::HashMap;
-    // let mut map: HashMap<String, Model> = HashMap::with_capacity(json.data.len());
+    // Option A: return as a deterministically-ordered map keyed by id
+    // use std::collections::BTreeMap;
+    // let mut map: BTreeMap<String, Model> = BTreeMap::new();
     // for m in json.data.into_iter() {
     //     map.insert(m.id.to_ascii_lowercase(), m);
     // }

@@ -1,18 +1,16 @@
 use once_cell::sync::Lazy;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // The build script writes `models_openrouter.json` to OUT_DIR.
 const MODELS_JSON: &str = include_str!(concat!(env!("OUT_DIR"), "/models_openrouter.json"));
 
 static MODELS: Lazy<HashMap<String, OpenRouterModel>> = Lazy::new(|| {
-    match serde_json::from_str::<HashMap<String, OpenRouterModel>>(MODELS_JSON) {
-        Ok(map) => map,
-        Err(_) => HashMap::new(),
-    }
+    serde_json::from_str::<HashMap<String, OpenRouterModel>>(MODELS_JSON).unwrap_or_default()
 });
 
-#[derive(Debug, Clone, Deserialize, Default)]
+/// Model metadata for an OpenRouter model embedded at build time.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct OpenRouterModel {
     #[serde(default)]
     pub id: String,
@@ -38,7 +36,8 @@ pub struct OpenRouterModel {
     pub supported_parameters: Vec<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
+/// Architecture details: supported modalities, tokenizer, and instruct type.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Architecture {
     #[serde(default)]
     pub input_modalities: Vec<String>,
@@ -50,7 +49,8 @@ pub struct Architecture {
     pub instruct_type: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
+/// Pricing information per unit (as strings from provider), when available.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Pricing {
     #[serde(default)]
     pub prompt: Option<String>,
@@ -70,7 +70,8 @@ pub struct Pricing {
     pub input_cache_write: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
+/// Limits and moderation flags from the top provider route.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct TopProvider {
     #[serde(default)]
     pub context_length: Option<u64>,

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env};
+use std::{collections::BTreeMap, env};
 
 use serde::{Deserialize, Serialize};
 
@@ -86,7 +86,6 @@ struct TopProvider {
     is_moderated: Option<bool>,
 }
 
-
 pub fn fetch_models_map_json() -> Result<String, Box<dyn std::error::Error>> {
     let url = "https://openrouter.ai/api/v1/models";
     let api_key = env::var("OPENROUTER_API_KEY").ok();
@@ -103,10 +102,12 @@ pub fn fetch_models_map_json() -> Result<String, Box<dyn std::error::Error>> {
     }
 
     let json: OpenRouterResponse = resp.json()?;
-    let mut map: HashMap<String, OpenRouterModel> = HashMap::with_capacity(json.data.len());
 
+    // Deterministic output: use a BTreeMap keyed by id (case-insensitive) so
+    // rebuilds without data changes do not churn the JSON file order.
+    let mut map: BTreeMap<String, OpenRouterModel> = BTreeMap::new();
     for model in json.data.into_iter() {
-        let key = model.id.clone();
+        let key = model.id.to_ascii_lowercase();
         map.insert(key, model);
     }
 
