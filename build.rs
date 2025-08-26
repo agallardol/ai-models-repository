@@ -12,35 +12,39 @@ fn main() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set by Cargo");
     let out_dir = PathBuf::from(out_dir);
 
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set by Cargo");
+    let model_data_dir = PathBuf::from(manifest_dir).join("model_data");
+
     // Known providers live under build/providers. Add more modules there.
     let providers = build_support::providers::ALL;
-
-    // Ensure every provider has a file, default `{}`.
-    for p in providers.iter() {
-        let path = out_dir.join(p.file_name);
-        if let Err(e) = fs::write(&path, "{}") {
-            println!("cargo:warning=Failed to initialize {}: {e}", path.display());
-        }
-    }
 
     // If the build env is present, rebuild all providers.
     let rebuild_all = env::var_os("MODELS_REPOSITORY_BUILD").is_some();
 
-    // Fetch for selected providers (all when env is present) and overwrite their files.
     for p in providers.iter() {
-        if !rebuild_all { continue; }
-        match (p.fetch)() {
-            Ok(json) => {
-                let path = out_dir.join(p.file_name);
-                if let Err(e) = fs::write(&path, json) {
-                    println!("cargo:warning=Failed to write {}: {e}", path.display());
+        let model_data_path = model_data_dir.join(p.file_name);
+        let out_path = out_dir.join(p.file_name);
+
+        if rebuild_all {
+            match (p.fetch)() {
+                Ok(json) => {
+                    if let Err(e) = fs::write(&model_data_path, &json) {
+                        println!("cargo:warning=Failed to write {}: {e}", model_data_path.display());
+                    }
+                    if let Err(e) = fs::write(&out_path, json) {
+                        println!("cargo:warning=Failed to write {}: {e}", out_path.display());
+                    }
+                }
+                Err(e) => {
+                    println!("cargo:warning=Failed to fetch {}: {e}", p.name);
+                    panic!("Failed to fetch {}: {e}", p.name);
                 }
             }
-            Err(e) => {
-                println!("cargo:warning=Failed to fetch {}: {e}", p.name);
-                panic!("Failed to fetch {}: {e}", p.name);
+        } else {
+            let json = fs::read_to_string(&model_data_path).unwrap_or_else(|_| "{}".to_string());
+            if let Err(e) = fs::write(&out_path, json) {
+                println!("cargo:warning=Failed to write {}: {e}", out_path.display());
             }
         }
     }
 }
-// Provider types and implementations live under ./build
